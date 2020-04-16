@@ -88,8 +88,19 @@ def kmeans_max_cluster(X,k,max_size,maxiter = 100,n_jobs=None,verbose=0):
             prev_assignment = np.copy(assignment)
             
         # update centers
+        toremove = []
         for i in range(k):
-            centers[i] = X[assignment==i].mean(0)
+            boolidxs = assignment==i
+            if boolidxs.sum()==0:
+                #remove empty centers
+                toremove.append(i)
+            else:
+                centers[i] = X[assignment==i].mean(0)
+        if toremove:
+            centers = np.delete(centers, (toremove), axis=0)
+            k-=len(toremove)
+            if verbose>0:
+                print('removed centers: ',toremove)
     if verbose>0 and iiter==maxiter :
         print('maximum number of iterations reached')
     return assignment,centers
